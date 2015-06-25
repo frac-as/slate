@@ -22,12 +22,9 @@ search: true
 
 # Introduction
 
-The [Frac.as](https://frac.as/) Client API lets you sync your users' app settings across devices.  
+The [Fracas](https://frac.as/) Client API lets you sync your users' app settings across devices.  
 
 We have [Client Libraries]() available for download in Objective-C, Swift, Java and C#, which should be enough to get you up and running on most mobile platforms.  
-We've also included inst' language bindings in Shell, Ruby, and Python! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.
-
-This example API documentation page was created with [Slate](http://github.com/tripit/slate). Feel free to edit it and use it as a base for your own API's documentation.
 
 # Common Parameters
 
@@ -74,18 +71,10 @@ DeviceKey always trumps DeviceID if both are supplied in an API call.
 
 ## GetDeviceStatus
 
-```objective_c
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get
+```
 ```
 
 ```swift
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get()
 ```
 
 ```shell
@@ -100,9 +89,9 @@ UNKNOWN
 ```csharp
 using Fracas.Client
 
-var client = new FracasClient("api_123456", "app_234567");
-var deviceID = client.GetDeviceID();
-var result = client.GetDeviceStatus(deviceID);
+FracasClient.PublicKey = "pub_YOUR_PUBLIC_KEY";
+FracasClient.AppKey = "app_YOUR_APP_KEY";
+var status = FracasClient.GetDeviceStatus();
 ```
 
 
@@ -110,15 +99,11 @@ This endpoint retrieves the connection status of the specified device.
 
 ### HTTP Request
 
-`GET https://api.frac.as/api/GetDeviceStatus`
+`POST https://api.frac.as/api/GetDeviceStatus`
 
 ### Query Parameters
 
-Parameter | Description
---------- | -----------
-publickey | A valid public key associated with your account
-projectid | The id for the project
-deviceid | The unique identifier for the device, as described in [DeviceIDs](#deviceids)
+This endpoint requires only the [Common Parameters](#common-parameters) described above.
 
 ### Device Status Codes
 
@@ -128,64 +113,324 @@ Unknown | This device has never before been seen, or is not associated with any 
 AutoConnectable | This device has previously been connected to a device running the specified project.  It may be connected to this project without further user intervention.
 Connected | This device has been successfully connected to this project.
 
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
-</aside>
 
-## Get a Specific Kitten
+## GetDeviceCount
 
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get(2)
+```
 ```
 
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get(2)
+```swift
 ```
 
 ```shell
-curl "http://example.com/api/kittens/3"
--H "Authorization: meowmeowmeow"
+curl "https://api.frac.as/v1/getdevicecount" \
+  -d publickey=pub_YOUR_PUBLIC_KEY \
+  -d appkey=app_YOUR_APP_KEY \
+  -d deviceid=USER_DEVICE_UDID
+
+2
 ```
 
-```c#
+```csharp
 using Fracas.Client
 
-var client = new FracasClient("api_123456", "app_234567");
-var result = client.Get
-curl "http://example.com/api/kittens/3"
--H "Authorization: meowmeowmeow"
-```
-
-> The above command returns JSON structured like this:
-
-```json
-{
-  "id": 2,
-  "name": "Isis",
-  "breed": "unknown",
-  "fluffiness": 5,
-  "cuteness": 10
-}
+FracasClient.PublicKey = "pub_YOUR_PUBLIC_KEY";
+FracasClient.AppKey = "app_YOUR_APP_KEY";
+var count = FracasClient.GetDeviceCount();
 ```
 
 
-This endpoint retrieves a specific kitten.
+This endpoint retrieves the number of devices connected to this app by the owner of the specified device.
 
-<aside class="warning">If you're not using an administrator API key, note that some kittens will return 403 Forbidden if they are hidden for admins only.</aside>
+You'll use this to check whether the user in question is approaching the limit you've set for the maximum number of devices per app (the default is 5).
 
 ### HTTP Request
 
-`GET http://example.com/kittens/<ID>`
+`POST https://api.frac.as/api/GetDeviceCount`
 
-### URL Parameters
+### Returns
+
+`2`
+
+### Query Parameters
+
+This endpoint requires only the [Common Parameters](#common-parameters) described above.
+
+## PrepareAddDevice
+
+```
+```
+
+```swift
+```
+
+```shell
+curl "https://api.frac.as/v1/prepareadddevice" \
+  -d publickey=pub_YOUR_PUBLIC_KEY \
+  -d appkey=app_YOUR_APP_KEY \
+  -d deviceid=USER_DEVICE_UDID
+
+123123
+```
+
+```csharp
+using Fracas.Client
+
+FracasClient.PublicKey = "pub_YOUR_PUBLIC_KEY";
+FracasClient.AppKey = "app_YOUR_APP_KEY";
+var count = FracasClient.PrepareAddDevice();
+
+
+
+returns "123123"
+```
+
+
+This endpoint prepares the app to receive a connection from a new device on the same wifi network as the specified one.  It returns a code that can be used to complete the connection.
+
+<aside class="notice">
+PrepareAddDevice is only required if the DeviceStatus returned from <a href="#getdevicestatus">GetDeviceStatus</a> is `Unknown`.  Otherwise, you can jump straight to <a href="#connectdevice">ConnectDevice</a>.
+</aside>
+
+### HTTP Request
+
+`POST https://api.frac.as/api/PrepareAddDevice`
+
+### Returns
+
+`123123`
+
+### Query Parameters
+
+This endpoint requires only the [Common Parameters](#common-parameters) described above.
+
+## AddDevice
+
+```
+```
+
+```swift
+```
+
+```shell
+curl "https://api.frac.as/v1/adddevice" \
+  -d publickey=pub_YOUR_PUBLIC_KEY \
+  -d appkey=app_YOUR_APP_KEY \
+  -d deviceid=USER_DEVICE_UDID \
+  -d unlockcode=123123
+
+
+dev_1234123412341234
+```
+
+```csharp
+using Fracas.Client
+
+FracasClient.PublicKey = "pub_YOUR_PUBLIC_KEY";
+FracasClient.AppKey = "app_YOUR_APP_KEY";
+var status = FracasClient.AddDevice("123123");
+
+
+
+returns "dev_1234123412341234"
+
+```
+
+
+This endpoint will connect the specified device to another of the user's devices.  It returns a unique [DeviceKey](#devicekey) that should be stored within the app and used for future API calls.
+
+### HTTP Request
+
+`POST https://api.frac.as/api/AddDevice`
+
+### Returns
+
+`dev_1234123412341234`
+
+### Query Parameters
+
+This parameter is usually required to be passed in addition to the [Common Parameters](#common-parameters) described above.
 
 Parameter | Description
 --------- | -----------
-ID | The ID of the cat to retrieve
+unlockcode | The unlock code returned from a recent [PrepareAddDevive](#prepareadddevice) call.  May be omitted if the device has returned the AutoConnectable status from [GetDeviceStatus](#getdevicestatus).
+
+
+## SetState
+
+```
+```
+
+```swift
+```
+
+```shell
+curl "https://api.frac.as/v1/setstate" \
+  -d publickey=pub_YOUR_PUBLIC_KEY \
+  -d appkey=app_YOUR_APP_KEY \
+  -d deviceid=USER_DEVICE_UDID
+  -d statekey=color
+  -d statevalue=yellow
+
+```
+
+```csharp
+using Fracas.Client
+
+FracasClient.PublicKey = "pub_YOUR_PUBLIC_KEY";
+FracasClient.AppKey = "app_YOUR_APP_KEY";
+var status = FracasClient.SetState("color", "yellow");
+
+```
+
+
+This endpoint sets the state data for the specified key for the user associated with this device.
+
+### HTTP Request
+
+`POST https://api.frac.as/api/SetState`
+
+### Query Parameters
+
+These required parameters should be passed in addition to the [Common Parameters](#common-parameters) described above.
+
+Parameter | Description
+--------- | -----------
+statekey | A string key to identify the data being stored
+statevalue | The string content of the data to store
+
+
+
+## GetState
+
+```
+```
+
+```swift
+```
+
+```shell
+curl "https://api.frac.as/v1/getstate" \
+  -d publickey=pub_YOUR_PUBLIC_KEY \
+  -d appkey=app_YOUR_APP_KEY \
+  -d deviceid=USER_DEVICE_UDID
+  -d statekey=color
+
+
+yellow
+
+```
+
+```csharp
+using Fracas.Client
+
+FracasClient.PublicKey = "pub_YOUR_PUBLIC_KEY";
+FracasClient.AppKey = "app_YOUR_APP_KEY";
+var status = FracasClient.GetState("color");
+
+
+
+returns "yellow"
+
+```
+
+
+This endpoint retrieves the state data stored in the specified key for the user associated with this device.
+
+### HTTP Request
+
+`POST https://api.frac.as/api/GetState`
+
+### Returns
+
+`yellow`
+
+### Query Parameters
+
+This required parameter should be passed in addition to the [Common Parameters](#common-parameters) described above.
+
+Parameter | Description
+--------- | -----------
+statekey | A string key to identify the data being retrieved
+
+
+
+## DeleteState
+
+```
+```
+
+```swift
+```
+
+```shell
+curl "https://api.frac.as/v1/deletestate" \
+  -d publickey=pub_YOUR_PUBLIC_KEY \
+  -d appkey=app_YOUR_APP_KEY \
+  -d deviceid=USER_DEVICE_UDID
+  -d statekey=color
+
+```
+
+```csharp
+using Fracas.Client
+
+FracasClient.PublicKey = "pub_YOUR_PUBLIC_KEY";
+FracasClient.AppKey = "app_YOUR_APP_KEY";
+var status = FracasClient.DeleteState("color");
+
+```
+
+
+This endpoint deletes the state data stored in the specified key for the user associated with this device.
+
+### HTTP Request
+
+`POST https://api.frac.as/api/DeleteState`
+
+### Query Parameters
+
+This required parameter should be passed in addition to the [Common Parameters](#common-parameters) described above.
+
+Parameter | Description
+--------- | -----------
+statekey | A string key to identify the data being deleted
+
+
+
+## DeleteDevice
+
+```
+```
+
+```swift
+```
+
+```shell
+curl "https://api.frac.as/v1/deletedevice" \
+  -d publickey=pub_YOUR_PUBLIC_KEY \
+  -d appkey=app_YOUR_APP_KEY \
+  -d deviceid=USER_DEVICE_UDID
+
+```
+
+```csharp
+using Fracas.Client
+
+FracasClient.PublicKey = "pub_YOUR_PUBLIC_KEY";
+FracasClient.AppKey = "app_YOUR_APP_KEY";
+var status = FracasClient.DeleteDevice();
+
+```
+
+
+This endpoint removes a device from the specified project.
+
+### HTTP Request
+
+`POST https://api.frac.as/api/DeleteDevice`
+
+### Query Parameters
+
+This endpoint requires only the [Common Parameters](#common-parameters) described above.
 

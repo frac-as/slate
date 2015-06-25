@@ -41,6 +41,22 @@ html, body {
 // TABLE OF CONTENTS
 ////////////////////////////////////////////////////////////////////////////////
 
+.logo
+{
+  font-size: 32px;
+  padding: 10px;
+}
+.logo>a
+{
+  color: #fff;
+  text-decoration:none; 
+}
+.logo>a>i
+{
+  color: #A7BCDD;
+  font-style: normal;
+}
+
 #toc > ul > li > a > span {
   float: right;
   background-color: #2484FF;
